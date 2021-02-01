@@ -7,6 +7,12 @@ with open("nadocodig.html","w",encoding="UTF-8") as f:
     f.write(res.text)
 
 
+# USERAGENT
+
+# 스마트폰으로 접속하는지 웹으로 접속하는지 보여줌
+# 일반적인 경로로 들어가지 않을때는 경로를 막거나 권한을 ㅜ찌 않을 수도있음
+# 그럴떄 useragent를 줘서 사람 맞아요! 라고 할 수있음
+
 
 
 

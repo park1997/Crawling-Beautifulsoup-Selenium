@@ -17,3 +17,12 @@ print("웹스크래핑을 진행합니다.")
 print(len(res2.text))
 with open("mygoogle.html","w",encoding="UTF-8") as f:
     f.write(res2.text)
+
+# requests
+
+# 웹페이지를 읽어올때 쓰임
+
+# 하지만 동적인 웹페이지를 읽을떄 안됨
+# 셀레늄은 느리지만 동적인 웹페이지를 읽을떄 가능
+
+# res.raise_for_status() 는 접속에 문제가 있는지 없는지 확인하는 역할
