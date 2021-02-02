@@ -68,3 +68,6 @@ for movie in movies:
         print("할인되지 않은 영화 : {}\t가격 : {}".format(title,price))
 
 browser.quit()
+
+
+

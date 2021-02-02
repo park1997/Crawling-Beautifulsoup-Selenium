@@ -63,6 +63,22 @@ prev_height = browser.execute_script("return document.body.scrollHeight")
 # 반복 수행
 while True:
 
+
+
+
+    # 여기부터 해야함 !!!
+    # 해야할것 :
+    # 스크롤 내리는 방법에 대한 Searching
+    # 스크롤을 내렸다면, 새로고침된 정보 Crawling
+    # 동일매물 묶기 체크가 됐는지 안됐는지에 대해 Logic 작성
+    
+
+
+
+
+
+
+
     # $("#address_group2").checked
     # true
     # $("#address_group2").checked
@@ -189,7 +205,7 @@ for num in range(len(width_info)):
                     temp_list.append(detail_info_name+" : "+detail_info_num)
                 info[width_info_name][title]=temp_list
                 checking_boolean = False
-            # rowsapn = 2 다음 태그 , 해당면적 매물, 관리비, 보유세
+            # rowspan = 2 다음 태그 , 해당면적 매물, 관리비, 보유세
             elif (not checking_boolean) and details_table.find("ul"):
                 detail_infos = details_table.find_all("li",attrs={"class":"info_list_item"})
                 for detail_info in detail_infos:
@@ -206,6 +222,7 @@ for num in range(len(width_info)):
                 info[width_info_name][title]=temp_list
                 checking_boolean = False
         except :
+            # 예외처리
             pass
     # 면적별로 묶어서 Json형태로 
     temp[width_info[num].get_text()]=info[width_info_name]
@@ -266,30 +283,30 @@ for num in range(len(width_info)):
         if soup.find("div",attrs={"class":"detail_asking_price"}):
             # 상한가 하한가 정보가 들은 테이블 소스
             min_max_table = soup.find_all("div",attrs={"class":"detail_table_cell"})
-            print(min_max_table)
 
+            # "하한가", 하한가의 가격을 가져오기
             min_name = min_max_table[0].find("span").get_text()
             min_price = min_max_table[0].find("strong").get_text()
 
-
+            # "상한가", 상한가의 가격을 가져오기 
             max_name = min_max_table[1].find("span").get_text()
             max_price = min_max_table[1].find("strong").get_text()
 
-
+            # 매매가 대비 전세가, 그 에 해당하는 퍼센트를 가져옴
             rent_fee_name = min_max_table[2].find("span").get_text()
             rent_fee_price = min_max_table[2].find("strong").get_text()
 
-
+            # 크롤링한 데이터를 Json형태로 저장
             info[actual_transaction][width_info[num].get_text()][selling_type[i].get_text()][min_name] = min_price
             info[actual_transaction][width_info[num].get_text()][selling_type[i].get_text()][max_name] = max_price
-            info[actual_transaction][width_info[num].get_text()][selling_type[i].get_text()][rent_fee_name] = rent_fee_price
-            
+            info[actual_transaction][width_info[num].get_text()][selling_type[i].get_text()][rent_fee_name] = rent_fee_price            
         else:
+            # 그에 해당하는 데이터가 없을 경우 "해당 기간 내 시세 및 실거래 정보가 없습니다." 출력
             info[actual_transaction][width_info[num].get_text()][selling_type[i].get_text()] = "해당 기간 내 시세 및 실거래가 정보가 없습니다"
         
 print(info)
-print("*"*100)
 
-
+# 브라우저 종료전 1초 쉬기
 time.sleep(interval)
+# 브라우저 종료
 browser.quit()
