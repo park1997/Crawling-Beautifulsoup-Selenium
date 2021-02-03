@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
-def create_soup(soup):
+def create_soup(url):
     headers={"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"}
     res= requests.get(url,headers=headers)
     res.raise_for_status()
@@ -34,74 +34,59 @@ url="https://new.land.naver.com/complexes/"
 # 실제 접속하는 것 처럼 보이는 headers
 headers={"User-Agent":"Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36","Accept-Language":"ko-KR,ko"}
 
-# 크롬 웹드라이버
+# 크롬 웹드라이버 백그라운드X
 browser = webdriver.Chrome("./chromedriver")
+# 크롬 웹드라이버 백그라운드에서 실행 O
 # browser = webdriver.Chrome("./chromedriver",options=options)
 
-
-# 창 최대화
-browser.maximize_window()
 
 # 검색할 아파트의 고유 번호 입력
 # num = input("아파트의 고유 번호 입력 >")
 
 # URL + 고유번호
 # url = url + num
-url += "113853"
+url += "1525"
 # 페이지 이동
 browser.get(url)
+
+# 창 최대화
+browser.maximize_window()
 
 # 문서의 높이만큼 스크롤을 내림
 browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
 # window.scrollTo(0,document.querySelector(".scrollingContainer").scrollHeight)
+
 # 1초에 1번 스크롤 내림
 interval = 1
 
-# 현재 문서 높이를 가져와서 저장
-prev_height = browser.execute_script("return document.body.scrollHeight")
-
-# 반복 수행
-while True:
+# 동일 매물 묶기
+browser.find_element_by_class_name("address_filter").click()
 
 
 
+prev = len(browser.find_elements_by_class_name("item_link"))
 
-    # 여기부터 해야함 !!!
-    # 해야할것 :
-    # 스크롤 내리는 방법에 대한 Searching
-    # 스크롤을 내렸다면, 새로고침된 정보 Crawling
-    # 동일매물 묶기 체크가 됐는지 안됐는지에 대해 Logic 작성
+# # 반복 수행
+# while True:
+#     # 현재 보이는 매물의 elements
+#     elem=browser.find_elements_by_class_name("item_link")
+#     # 맨밑 요소 클릭하면 매물이 업데이트됨
+#     elem[prev-1].click()
+#     # 로딩으로인한 오류 제거를위해 1초간 쉬어줌
+#     time.sleep(interval)
+#     # 현재 매물 개수 업데이트
+#     curr = len(elem)
+#     # 이전 매물개수와 현재매물 개수가 같다는건 더이상 업데이트 할매물이 없다는 뜻
+#     if prev==curr:
+#         break
     
+#     # 매물 개수 업데이트 
+#     prev = curr
 
-
-
-
-
-
-
-    # $("#address_group2").checked
-    # true
-    # $("#address_group2").checked
-    # false
-
-    # 스크롤을 가장 아래로 내림
-    browser.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-
-    # 페이지 로딩이있을수 있기때문에 1초간 쉬어줌
-    time.sleep(interval)
-
-    # 현재 높이를 가져와서 저장
-    current_height = browser.execute_script("return document.body.scrollHeight")
-    if prev_height==current_height:
-        break
-
-    # 높이를 업데이트 함
-    prev_height = current_height
 print("스크롤 완료!")
 
 # 현재 페이지 소스를 lxml 로 parsing 함
 soup = BeautifulSoup(browser.page_source,"lxml")
-
 
 # 단지 명 
 complex_title = soup.find("h3",attrs={"class":"title","id":"complexTitle"}).get_text()
@@ -120,6 +105,9 @@ time.sleep(interval)
 # soup 객체 다시 받아옴
 soup = BeautifulSoup(browser.page_source,"lxml")
 
+# 데이터가 들어갈 임시 저장소 
+temp = []
+items = soup.find("div",attrs={"class":"infinite_scroll "})
 
 # 단지 정보 테이블 소스코드
 complex_infos = soup.find("table",attrs={"class":"info_table_wrap"}).find_all("tr",attrs={"class":"info_table_item"})
