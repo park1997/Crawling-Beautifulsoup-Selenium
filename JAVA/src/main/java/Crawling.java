@@ -6,7 +6,6 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
@@ -97,8 +96,21 @@ public class Crawling {
 
         info.put(complex_info,detail_info);
 
+        // 나중에 다시 쓰기위해 초기화 함(Json)
+        detail_info=null;
+        // 해당면적 매물 : [매매 1, 전세2 ..] 와 같이 표현하기 위한 ArrayList 공간
+        ArrayList<String> item_detail_info = new ArrayList<>();
+
+
         // "단지 내 면적별 정보" 테이블
-        String size_infos = doc.select("h5.heading_text").text();
+        Elements size_infos = doc.select("h5.heading_text");
+        System.out.println(size_infos);
+        // "단지 내 면적별 정보" String
+        String width_info_name = size_infos.select("h5.heading_text").text();
+        System.out.println(width_info_name);
+
+
+
 
 
 
