@@ -102,15 +102,25 @@ public class Crawling {
         ArrayList<String> item_detail_info = new ArrayList<>();
 
 
-        // "단지 내 면적별 정보" 테이블
+        // "단지 내 면적별 정보" 테이블( 이거 왜 썼지? )
         Elements size_infos = doc.select("h5.heading_text");
-        System.out.println(size_infos);
+//        System.out.println(size_infos);
         // "단지 내 면적별 정보" String
         String width_info_name = size_infos.select("h5.heading_text").text();
-        System.out.println(width_info_name);
+//        System.out.println(width_info_name);
+
+        /*
+        여기부터 다시!!!!!
+
+         */
 
 
 
+
+
+        Elements complex_size_infos = doc.select("a.detail_sorting_tab");
+
+        System.out.println(size_infos.size());
 
 
 
