@@ -97,7 +97,8 @@ public class Crawling {
 
         info.put(complex_info,detail_info);
 
-        
+        // "단지 내 면적별 정보" 테이블
+        String size_infos = doc.select("h5.heading_text").text();
 
 
 
