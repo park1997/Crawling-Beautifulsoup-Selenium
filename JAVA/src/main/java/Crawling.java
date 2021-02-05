@@ -10,6 +10,8 @@ import java.util.ArrayList;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
+import org.openqa.selenium.json.Json;
+
 public class Crawling {
     public static void main(String[] args) {
         int interval =1000;
@@ -214,10 +216,125 @@ public class Crawling {
         info.put(width_info_name,small_info);
 
 
+        // 로딩으로 인해 오류 방지를 위한 interval
+        try {
+            Thread.sleep(interval);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
+        // "시세/실거래가"
+        String actual_transaction = doc.select("button.complex_link").get(1).text();
 
+        // 시세/실거래가 클릭
+        driver.findElementByXPath("//*[@id=\"summaryInfo\"]/div[2]/div[2]/button[2]").click();
 
+        // 현재 페이지의 소스코드 가져오기(페이지 소스 업데이트)
+        doc = Jsoup.parse(driver.getPageSource());
 
+        // 시세/실거래가 면적 정보들
+        width_info = doc.select("div#detailContents2 div.detail_sorting_tabs div.detail_sorting_inner div.detail_sorting_tablist span.detail_sorting_width a span");
+
+        // "매매", "전세", "월세"
+        Elements selling_type = doc.select("div.detail_box--chart div.detail_sorting_tabs--underbar a");
+
+        JSONObject selling_type_obj = new JSONObject();
+        JSONObject width_type_obj = new JSONObject();
+
+        try {
+            for (int num = 0; num < width_info.size(); num++){
+                // 페이지 로딩으로 인하여 0.2초간 쉬어줌
+                try {
+                    Thread.sleep(200);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                // 시세/실거래가 면적 for loop를 통해 클릭
+                driver.findElementByLinkText(width_info.get(num).text()).click();
+
+                // 현재 페이지의 소스코드 가져오기(페이지 소스 업데이트)
+                doc = Jsoup.parse(driver.getPageSource());
+
+                for (int i = 0; i < selling_type.size()-1; i++) {
+                    String id = String.format("marketPriceTab%d", i+1);
+
+                    driver.findElementById(id).click();
+
+                    // 현재 페이지의 소스코드 가져오기(페이지 소스 업데이트)
+                    doc = Jsoup.parse(driver.getPageSource());
+
+                    // actual price detail
+                    JSONObject act_pri_details = new JSONObject();
+                    // 값이 있는 경우
+                    if (doc.select("div.detail_asking_price").size() != 0) {
+                        // 상한가, 하한가의 정보가 들은 테이블 소스
+                        Elements min_max_table = doc.select("div.detail_table_cell");
+
+                        // "하한가"
+                        String min_name = min_max_table.get(0).select("span").text();
+                        // 하한가 가격
+                        String min_price = min_max_table.get(0).select("strong").text();
+
+                        // "하한가"
+                        String max_name = min_max_table.get(1).select("span").text();
+                        // 하한가 가격
+                        String max_price = min_max_table.get(1).select("strong").text();
+
+                        // 매매가 대비 전세가
+                        String rent_fee_name = min_max_table.get(2).select("span").text();
+                        // 매매가 대비 전세가 퍼센트(%)
+                        String rent_fee_price = min_max_table.get(2).select("strong").text();
+
+                    /*
+                    {"하한가":"xx원",
+                     "상한가":"xx원",
+                     "매매가 대비 전세가":"xx%"}
+                     */
+                        act_pri_details.put(min_name, min_price);
+                        act_pri_details.put(max_name, max_price);
+                        act_pri_details.put(rent_fee_name, rent_fee_price);
+
+                    /*
+                    {"매매":
+                        {"하한가":"xx원",
+                        "상한가":"xx원",
+                        "매매가 대비 전세가":"xx%"}
+                        }
+                     */
+                        selling_type_obj.put(selling_type.get(i).text(), act_pri_details);
+
+                     // 값이 없는 경우
+                    }else {
+                        selling_type_obj.put(selling_type.get(i).text(), "해당 기간 내 시세 및 실거래가 정보가 없습니다");
+                    }
+
+                    /*
+                    {"76m":
+                        {"매매":
+                            {"하한가":"xx원",
+                            "상한가":"xx원",
+                            "매매가 대비 전세가":"xx%"}
+                            }
+                     */
+                    width_type_obj.put(width_info.get(num).text(), selling_type_obj);
+                }
+            }
+            /*
+            {"시세/실거래가":
+                {"76m":
+                    {"매매":
+                        {"하한가":"xx원",
+                        "상한가":"xx원",
+                        "매매가 대비 전세가":"xx%"}
+                        }
+                    }
+             */
+            info.put(actual_transaction, width_type_obj);
+
+        }catch (Exception e){
+            e.printStackTrace();
+        }
 
 
         // 결과 출력
