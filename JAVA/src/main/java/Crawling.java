@@ -1,3 +1,4 @@
+import jdk.swing.interop.SwingInterOpUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -11,6 +12,9 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
 public class Crawling {
     public static void main(String[] args) {
+        int interval =1000;
+
+
         ChromeDriver driver = new ChromeDriver();
         // 정체 정보가 들어갈 Json
         JSONObject info = new JSONObject();
@@ -56,7 +60,7 @@ public class Crawling {
             // 단지 정보 클릭!
             driver.findElementByClassName("complex_link").click();
             // 혹시 모를 로딩으로 인해 1초 쉬어줌
-            Thread.sleep(1000);
+            Thread.sleep(interval);
         }catch(Exception e){
             e.printStackTrace();
         }
@@ -102,25 +106,114 @@ public class Crawling {
         ArrayList<String> item_detail_info = new ArrayList<>();
 
 
-        // "단지 내 면적별 정보" 테이블( 이거 왜 썼지? )
+        // "단지 내 면적별 정보" 테이블
         Elements size_infos = doc.select("h5.heading_text");
-//        System.out.println(size_infos);
-        // "단지 내 면적별 정보" String
-        String width_info_name = size_infos.select("h5.heading_text").text();
-//        System.out.println(width_info_name);
-
-        /*
-        여기부터 다시!!!!!
-
-         */
+        // 위 테이블에서 뽑아낸 "단지 내 면적별 정보" String
+        String width_info_name = doc.select("div.detail_box--floor_plan div.heading h5.heading_text").text().strip();
 
 
 
+        Elements width_info = doc.select("div.detail_box--floor_plan a.detail_sorting_tab");
+        JSONObject small_info = new JSONObject();
+        for (int num = 0; num < width_info.size(); num++) {
+            JSONObject obj_temp = new JSONObject();
+            // click 을 위한 xpath 설정
+            String xpath = String.format("//*[@id=\"tab%d\"]", num);
+            // tab을 클릭함
+            driver.findElementByXPath(xpath).click();
+
+            // 탭 클릭때마다 0.1초 쉼
+            // 0.1초만 쉬어도 돌아가는것을 확인했음!
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+
+            // 현재 페이지의 소스코드 가져오기(페이지 소스 업데이트)
+            doc = Jsoup.parse(driver.getPageSource());
 
 
-        Elements complex_size_infos = doc.select("a.detail_sorting_tab");
+            // 공급/전용, 방수/욕실수, 해다연적 세대수.. 등 에 대한 정보 table
+            Elements size_infos_table = doc.select("div.detail_box--floor_plan table.info_table_wrap tr.info_table_item");
+            // rowspan = 2 인 경우를 구별하기위한 boolean
+            boolean checking_boolean = true;
 
-        System.out.println(size_infos.size());
+            String title_for_rowspan = null;
+
+            // 단지내 면적별 정보를 담기 위한 JSOUP
+            /*
+            77m:{xx:xx,
+                yy:yy,
+                ...
+                zz:zz}
+             */
+            JSONObject obj_detail = new JSONObject();
+
+            // 단지정보 -> 단지 내 면적별 정보 전체 크롤링 하기위한 for loop
+            for(Element details_table : size_infos_table){
+                // 데이터가 잠깐 담길 지역변수
+                String title = null;
+                String detail = null;
+                JSONArray temp_array = new JSONArray();
+                // 여기서 오류가 발생할 확률이 있으므로 예외처리로 오류가 발생하면 정보 못가져오게 !
+                // 매물마다 있는 정보가 있고 없는 정보가 있기때문에 오류가 발생 할 수도(?) 있음
+                try{
+                        // 공급/ 전용, 방수/욕실 수, 해당면적 세대수, 현관구조, 공시가격
+                    if (details_table.select("th.table_th").size() != 0 && details_table.select("td.table_td").size() != 0 && (checking_boolean) && (details_table.select("th[rowspan=2]").size() == 0)) {
+                        title = details_table.select("th.table_th").text();
+                        if (details_table.select("strong").size() != 0) {
+                            detail = details_table.select("strong").text();
+                        }else{
+                            detail = details_table.select("td.table_td").text();
+                        }
+                        obj_detail.put(title, detail);
+                        // 해당면적 매물, 관리비, 보유세
+                    }else if (details_table.select("th[rowspan=2]").size() != 0 && checking_boolean && details_table.select("a").size() != 0) {
+                        // 소 분류 이름
+                        title = details_table.select("th[rowspan=2]").text();
+                        // rowspan으로 인해 다음 태그에서 title 값을 못가져오므로 다른 변수에 타이틀 값 저장
+                        title_for_rowspan = title;
+                        Elements detail_infos = details_table.select("a.data");
+                        String detail_info_name = null;
+                        String detail_info_num = null;
+                        for(Element elem : detail_infos){
+                            detail_info_name = elem.text();
+                            detail_info_num = elem.text();
+                            temp_array.add(detail_info_name+" : "+detail_info_num);
+                        }
+                        obj_detail.put(title, temp_array);
+                        checking_boolean = false;
+                        // rowspan = 2 다음태그, 해당면적 매물, 관리비, 보유세
+                    }else if (!(checking_boolean) && (details_table.select("ul").size() != 0)){
+                        Elements detail_infos = details_table.select("li.info_list_item");
+                        for(Element elem : detail_infos){
+                            detail = elem.text().strip();
+                            temp_array.add(detail);
+                        }
+                        obj_detail.put(title_for_rowspan, temp_array);
+                        checking_boolean = true;
+                        title_for_rowspan = null;
+                        // 보유세 지역 크롤링 ( a 태그가 없는 것이 특징 !)
+                    } else if (checking_boolean && details_table.select("th.table_th").size() != 0 && details_table.select("th[rowspan=2]").size() != 0 && details_table.select("a").size() == 0) {
+                        title = details_table.select("th.table_th").text();
+                        title_for_rowspan = title;
+                        detail = details_table.select("strong").text();
+                        temp_array.add(detail);
+                        checking_boolean = false;
+                        obj_detail.put(title, temp_array);
+                    }
+                }catch (IllegalStateException e){
+                    e.printStackTrace();
+                }
+            }
+            // Jsoup 형태로 저장
+            small_info.put(width_info.get(num).text(), obj_detail);
+        }
+        // Jsoup 형태로 저장
+        info.put(width_info_name,small_info);
+
+
 
 
 
@@ -132,7 +225,7 @@ public class Crawling {
 
         // 1초 쉬었다가 종료
         try {
-            Thread.sleep(1000);
+            Thread.sleep(interval);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
