@@ -1,31 +1,56 @@
-import org.json.simple.JSONArray;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.Keys;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import java.util.ArrayList;
+
 import org.json.simple.JSONObject;
+import org.json.simple.JSONArray;
+import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.events.EventFiringWebDriver;
+import org.openqa.selenium.support.ui.Select;
+
+import static org.openqa.selenium.Keys.PAGE_DOWN;
 
 
 public class ex01 {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+        ChromeDriver driver = new ChromeDriver();
+        // 정체 정보가 들어갈 Json
         JSONObject info = new JSONObject();
-        JSONArray arr = new JSONArray();
-        JSONObject detail = new JSONObject();
+        JavascriptExecutor js = (JavascriptExecutor) driver;
+        String url = "https://new.land.naver.com/complexes/1525";
+        // Chrome 열기
+        driver.get(url);
 
-        arr.add("11");
-        arr.add("12");
-        System.out.println(arr);
+        // Chrome 창 최대화
+//        driver.manage().window().maximize();
 
-        detail.put("num",arr);
-        info.put("단지내면적별정보", detail);
+//        현재 페이지의 소스코드 가져오기
+        Document doc = Jsoup.parse(driver.getPageSource());
 
-        System.out.println(info);
-        System.out.println(info.get("단지내면적별정보"));
-        System.out.println(info.get("단지내면적별정보").toString());
-        JSONObject object = (JSONObject) info.get("단지내면적별정보");
+        // 잠깐 쉬는 초 2 초
+        int interval = 2000;
 
-        System.out.println(object.get("num"));
+        JavascriptExecutor jse = (JavascriptExecutor)driver;
 
-        info.put("하이", detail.put("num", "arr"));
-        System.out.println(info);
-        info.put("단지내면적별정보", detail.put("num", arr));
-        System.out.println(info);
+        jse.executeScript("window.scrollTo(0,Math.max(document.documentElement.scrollHeight,document.body.scrollHeight,document.documentElement.clientHeight));");
+
+        Object scrollwrap = js.executeScript("document.querySelector('.item_list.item_list--article');");
+
+        Thread.sleep(interval);
+
+
+
+        driver.close();
+
+
 
 
     }

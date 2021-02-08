@@ -298,3 +298,4 @@ print(info)
 time.sleep(interval)
 # 브라우저 종료
 browser.quit()
+

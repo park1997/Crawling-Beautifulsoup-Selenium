@@ -9,7 +9,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
-
+interval = 1
 
 # 백그라운드에서 실행 (메모리 효율을 늘릴 수 있음)
 # options = webdriver.ChromeOptions()

@@ -10,14 +10,18 @@ import java.util.ArrayList;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
-import org.openqa.selenium.json.Json;
+import org.openqa.selenium.chrome.ChromeOptions;
+
 
 public class Crawling {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         int interval =1000;
 
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("headless");
 
-        ChromeDriver driver = new ChromeDriver();
+
+        ChromeDriver driver = new ChromeDriver(options);
         // 정체 정보가 들어갈 Json
         JSONObject info = new JSONObject();
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -25,21 +29,14 @@ public class Crawling {
 //        Document doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36").get();
 //        Document doc = Jsoup.connect(url).get();
 
+
+
+
         // Chrome 열기
         driver.get(url);
 
         // Chrome 창 최대화
         driver.manage().window().maximize();
-
-        /*
-        스크롤 해야하는 영역
-
-        코
-        드
-        짜
-        자
-
-         */
 
 
         // 현재 페이지의 소스코드 가져오기
@@ -86,7 +83,7 @@ public class Crawling {
         for(Element detail_complex_info : complex_infos){
             // 단지 정보 key(세대수, 저/최고층, 사용승인일, 총주차대수, 용적률, 건폐율, ...)
             for(Element detail : detail_complex_info.select("th.table_th")){
-                key_temp.add(detail.text());
+                key_temp.add(detail.text().replace("\\",""));
 //                System.out.println(detail.text());
             }
             // 단지 정보 value
@@ -337,6 +334,34 @@ public class Crawling {
         }
 
 
+        // 동일 매물 묶기
+        driver.findElementByClassName("address_filter").click();
+        Thread.sleep(interval);
+        // 매물 크롤링
+        // 현재 페이지의 소스코드 가져오기(페이지 소스 업데이트)
+        doc = Jsoup.parse(driver.getPageSource());
+
+        Elements for_sale_names = doc.select("div.item_list.item_list--article span.text");
+        Elements for_sale_prices = doc.select("div.item_list.item_list--article div.price_line");
+
+        JSONObject for_sales_details = new JSONObject();
+
+
+        /*
+        스크롤 하는 로직 구현~~
+
+
+         */
+
+
+        for (int i=0; i<for_sale_names.size();i++){
+            for_sales_details.put(for_sale_names.get(i).text().strip(), for_sale_prices.get(i).text().replace("\\","").strip());
+        }
+        // 매물 : {xxx: x억,
+        //        xxx: x억, ...}
+        info.put("매물", for_sales_details);
+
+
         // 결과 출력
         System.out.println(info);
 
@@ -347,5 +372,9 @@ public class Crawling {
             e.printStackTrace();
         }
         driver.quit();
+
+
+
+
     }
 }
