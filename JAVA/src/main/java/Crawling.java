@@ -18,10 +18,15 @@ public class Crawling {
         int interval =1000;
 
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("headless");
+        options.addArguments("--headless");
+        options.addArguments("Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
+        options.addArguments("disable-gpu");
+        options.addArguments("--disable-gpu");
+        options.addArguments("lang=ko_KR");
+        options.addArguments("window-size=1920x1080"); // 이거 안해주면 headless 때문에 안되고 useragent 넣어줘도 안됨
 
 
-        ChromeDriver driver = new ChromeDriver();
+        ChromeDriver driver = new ChromeDriver(options);
         // 정체 정보가 들어갈 Json
         JSONObject info = new JSONObject();
         JavascriptExecutor js = (JavascriptExecutor) driver;
@@ -29,15 +34,8 @@ public class Crawling {
 //        Document doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36").get();
 //        Document doc = Jsoup.connect(url).get();
 
-
-
-
         // Chrome 열기
         driver.get(url);
-
-        // Chrome 창 최대화
-        driver.manage().window().maximize();
-
 
         // 현재 페이지의 소스코드 가져오기
         Document doc = Jsoup.parse(driver.getPageSource());
@@ -221,11 +219,7 @@ public class Crawling {
 
 
         // 로딩으로 인해 오류 방지를 위한 interval
-        try {
-            Thread.sleep(interval);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        Thread.sleep(interval);
 
         // "시세/실거래가"
         String actual_transaction = doc.select("button.complex_link").get(1).text();
@@ -247,13 +241,8 @@ public class Crawling {
 
         try {
             for (int num = 0; num < width_info.size(); num++){
-                // 페이지 로딩으로 인하여 0.2초간 쉬어줌
-                try {
-                    Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-
+                // 페이지 로딩으로 인하여 0.4초간 쉬어줌
+                Thread.sleep(400);
                 // 시세/실거래가 면적 for loop를 통해 클릭
                 driver.findElementByLinkText(width_info.get(num).text()).click();
 
@@ -372,10 +361,10 @@ public class Crawling {
                 "}");
 
         while(isEnd) {
-            Thread.sleep(500);
+            Thread.sleep(400);
             Object result = js.executeScript("return window.scrollToBottom()");
             if (result != null) {
-                System.out.println("total count : " + result);
+//                System.out.println("total count : " + result);
                 isEnd = false;
             }
         }
@@ -402,6 +391,8 @@ public class Crawling {
 
         driver.quit();
 
-        
+
+
+
     }
 }
