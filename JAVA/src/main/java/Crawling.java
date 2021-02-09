@@ -21,11 +21,11 @@ public class Crawling {
         options.addArguments("headless");
 
 
-        ChromeDriver driver = new ChromeDriver(options);
+        ChromeDriver driver = new ChromeDriver();
         // 정체 정보가 들어갈 Json
         JSONObject info = new JSONObject();
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String url = "https://new.land.naver.com/complexes/1525";
+        String url = "https://new.land.naver.com/complexes/13261";
 //        Document doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36").get();
 //        Document doc = Jsoup.connect(url).get();
 
@@ -114,6 +114,13 @@ public class Crawling {
 
         Elements width_info = doc.select("div.detail_box--floor_plan a.detail_sorting_tab");
         JSONObject small_info = new JSONObject();
+
+        try{
+            driver.findElementByClassName("btn_moretab").click();
+        }catch(Exception e){
+            e.printStackTrace();
+        }
+
         for (int num = 0; num < width_info.size(); num++) {
             JSONObject obj_temp = new JSONObject();
             // click 을 위한 xpath 설정
@@ -140,7 +147,7 @@ public class Crawling {
 
             String title_for_rowspan = null;
 
-            // 단지내 면적별 정보를 담기 위한 JSOUP
+            // 단지내 면적별 정보를 담기 위한 JSON
             /*
             77m:{xx:xx,
                 yy:yy,
@@ -341,6 +348,38 @@ public class Crawling {
         // 현재 페이지의 소스코드 가져오기(페이지 소스 업데이트)
         doc = Jsoup.parse(driver.getPageSource());
 
+        boolean isEnd = true;
+        js.executeScript("var prevListCount = document.querySelectorAll('#articleListArea .item').length;\n" +
+                "var isFirst = true;\n" +
+                "window.scrollToBottom = function(){\n" +
+                "    // scroll 이동\n" +
+                "    var scrollWrp = document.querySelector('.item_list.item_list--article');\n" +
+                "    scrollWrp.scrollTop = scrollWrp.scrollHeight - scrollWrp.clientHeight;\n" +
+                "\n" +
+                "    var nextListCount = document.querySelectorAll('#articleListArea .item').length;\n" +
+                "\n" +
+                "    // 더이상 호출할 리스트가 없음\n" +
+                "    if(!isFirst && prevListCount == nextListCount){\n" +
+                "        console.log('finished! item count : ', nextListCount)\n" +
+                "        return nextListCount\n" +
+                "    }\n" +
+                "    else{\n" +
+                "        console.log('next')\n" +
+                "        prevListCount = nextListCount;\n" +
+                "    }\n" +
+                "\n" +
+                "    isFirst = false\n" +
+                "}");
+
+        while(isEnd) {
+            Thread.sleep(500);
+            Object result = js.executeScript("return window.scrollToBottom()");
+            if (result != null) {
+                System.out.println("total count : " + result);
+                isEnd = false;
+            }
+        }
+
         Elements for_sale_names = doc.select("div.item_list.item_list--article span.text");
         Elements for_sale_prices = doc.select("div.item_list.item_list--article div.price_line");
 
@@ -349,32 +388,20 @@ public class Crawling {
 
         /*
         스크롤 하는 로직 구현~~
-
-
          */
 
-
         for (int i=0; i<for_sale_names.size();i++){
-            for_sales_details.put(for_sale_names.get(i).text().strip(), for_sale_prices.get(i).text().replace("\\","").strip());
+            for_sales_details.put(for_sale_names.get(i).text().strip(), for_sale_prices.get(i).text().strip().replace("\\",""));
         }
         // 매물 : {xxx: x억,
         //        xxx: x억, ...}
         info.put("매물", for_sales_details);
 
-
         // 결과 출력
         System.out.println(info);
 
-        // 1초 쉬었다가 종료
-        try {
-            Thread.sleep(interval);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         driver.quit();
 
-
-
-
+        
     }
 }

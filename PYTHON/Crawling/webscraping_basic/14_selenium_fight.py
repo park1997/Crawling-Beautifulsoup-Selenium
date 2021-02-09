@@ -36,5 +36,6 @@ try:
     elem=WebDriverWait(browser,20).until(EC.presence_of_element_located((By.XPATH,"//*[@id=\"content\"]/div[2]/div/div[4]/ul/li[1]")))
     print(elem.text) # 첫번쨰 결과 출력
 finally:
+    time.sleep(5)
     browser.quit()
 
