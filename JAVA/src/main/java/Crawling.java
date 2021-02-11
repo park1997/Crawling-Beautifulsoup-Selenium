@@ -18,7 +18,7 @@ public class Crawling {
         int interval =1000;
 
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
+//        options.addArguments("--headless");
         options.addArguments("Mozilla/5.0 (Macintosh; Intel Mac OS X 11_2_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36");
         options.addArguments("disable-gpu");
         options.addArguments("--disable-gpu");
@@ -375,9 +375,6 @@ public class Crawling {
         JSONObject for_sales_details = new JSONObject();
 
 
-        /*
-        스크롤 하는 로직 구현~~
-         */
 
         for (int i=0; i<for_sale_names.size();i++){
             for_sales_details.put(for_sale_names.get(i).text().strip(), for_sale_prices.get(i).text().strip().replace("\\",""));
