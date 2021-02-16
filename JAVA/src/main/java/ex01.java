@@ -9,6 +9,7 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
@@ -21,36 +22,11 @@ import static org.openqa.selenium.Keys.PAGE_DOWN;
 
 public class ex01 {
     public static void main(String[] args) throws InterruptedException {
-        ChromeDriver driver = new ChromeDriver();
-        // 정체 정보가 들어갈 Json
-        JSONObject info = new JSONObject();
-        JavascriptExecutor js = (JavascriptExecutor) driver;
-        String url = "https://new.land.naver.com/complexes/1525";
-        // Chrome 열기
-        driver.get(url);
 
-        // Chrome 창 최대화
-//        driver.manage().window().maximize();
-
-//        현재 페이지의 소스코드 가져오기
-        Document doc = Jsoup.parse(driver.getPageSource());
-
-        // 잠깐 쉬는 초 2 초
-        int interval = 2000;
-
-        JavascriptExecutor jse = (JavascriptExecutor)driver;
-
-        jse.executeScript("window.scrollTo(0,Math.max(document.documentElement.scrollHeight,document.body.scrollHeight,document.documentElement.clientHeight));");
-
-        Object scrollwrap = js.executeScript("document.querySelector('.item_list.item_list--article');");
-
-        Thread.sleep(interval);
-
-
-
-        driver.close();
-
-
+        String ex = "95/75, 1/22층, 남향";
+        String[] split = ex.split(",");
+        System.out.println(Arrays.toString(split));
+        System.out.println(split[0]);
 
 
     }

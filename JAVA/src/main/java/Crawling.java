@@ -7,6 +7,7 @@ import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeDriver;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONArray;
@@ -30,7 +31,7 @@ public class Crawling {
         // 정체 정보가 들어갈 Json
         JSONObject info = new JSONObject();
         JavascriptExecutor js = (JavascriptExecutor) driver;
-        String url = "https://new.land.naver.com/complexes/13261";
+        String url = "https://new.land.naver.com/complexes/1525";
 //        Document doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36").get();
 //        Document doc = Jsoup.connect(url).get();
 
@@ -116,7 +117,7 @@ public class Crawling {
         try{
             driver.findElementByClassName("btn_moretab").click();
         }catch(Exception e){
-            e.printStackTrace();
+//            e.printStackTrace();
         }
 
         for (int num = 0; num < width_info.size(); num++) {
@@ -361,27 +362,42 @@ public class Crawling {
                 "}");
 
         while(isEnd) {
-            Thread.sleep(400);
             Object result = js.executeScript("return window.scrollToBottom()");
             if (result != null) {
 //                System.out.println("total count : " + result);
                 isEnd = false;
             }
+//            Thread.sleep(400);
         }
 
-        Elements for_sale_names = doc.select("div.item_list.item_list--article span.text");
-        Elements for_sale_prices = doc.select("div.item_list.item_list--article div.price_line");
-
-        JSONObject for_sales_details = new JSONObject();
-
-
+        doc = Jsoup.parse(driver.getPageSource());
+        Elements for_sale_names = doc.select("div.item_list.item_list--article div span.text");
+        Elements for_sale_prices = doc.select("div.item_list.item_list--article div div.price_line");
+        Elements for_sale_types = doc.select("div.item_list.item_list--article p.line strong.type");
+        Elements for_sale_specs = doc.select("div.item_list.item_list--article div.info_area");
+        JSONArray for_sale_arr = new JSONArray();
 
         for (int i=0; i<for_sale_names.size();i++){
-            for_sales_details.put(for_sale_names.get(i).text().strip(), for_sale_prices.get(i).text().strip().replace("\\",""));
+            JSONObject for_sale_details = new JSONObject();
+            for_sale_details.put("매물명", for_sale_names.get(i).text());
+            for_sale_details.put("가격", for_sale_prices.get(i).text());
+            for_sale_details.put("종류", for_sale_types.get(i).text());
+
+            // 면적, 층 , 방향만 있는 span.spec 만 들고오기 위한 필터링 과정!
+            Element element = for_sale_specs.get(i).select("span.spec").get(0);
+            // 면적, 층, 방향이 들어갈 String Array
+            String[] specs = element.text().split(",");
+
+            for_sale_details.put("면적", specs[0].strip());
+            for_sale_details.put("층", specs[1].strip());
+            for_sale_details.put("방향", specs[2].strip());
+
+            for_sale_arr.add(for_sale_details);
         }
-        // 매물 : {xxx: x억,
-        //        xxx: x억, ...}
-        info.put("매물", for_sales_details);
+        // 매물 : [{매물 명: xxx, 가격 : xxx, 종류: xxx, 스펙 : xxx},
+        //        {매물 명: xxx, 가격 : xxx, 종류: xxx, 스펙 : xxx},
+        //        ...]
+        info.put("매물", for_sale_arr);
 
         // 결과 출력
         System.out.println(info);
