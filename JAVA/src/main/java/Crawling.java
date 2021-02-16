@@ -117,7 +117,7 @@ public class Crawling {
         try{
             driver.findElementByClassName("btn_moretab").click();
         }catch(Exception e){
-//            e.printStackTrace();
+            e.printStackTrace();
         }
 
         for (int num = 0; num < width_info.size(); num++) {
@@ -237,23 +237,28 @@ public class Crawling {
         // "매매", "전세", "월세"
         Elements selling_type = doc.select("div.detail_box--chart div.detail_sorting_tabs--underbar a");
 
-        JSONObject selling_type_obj = new JSONObject();
+
         JSONObject width_type_obj = new JSONObject();
 
         try {
             for (int num = 0; num < width_info.size(); num++){
-                // 페이지 로딩으로 인하여 0.4초간 쉬어줌
-                Thread.sleep(400);
+                JSONObject selling_type_obj = new JSONObject();
+
                 // 시세/실거래가 면적 for loop를 통해 클릭
                 driver.findElementByLinkText(width_info.get(num).text()).click();
-
+                // 페이지 로딩으로 인하여 0.4초간 쉬어줌
+                Thread.sleep(400);
                 // 현재 페이지의 소스코드 가져오기(페이지 소스 업데이트)
                 doc = Jsoup.parse(driver.getPageSource());
 
                 for (int i = 0; i < selling_type.size()-1; i++) {
+
                     String id = String.format("marketPriceTab%d", i+1);
 
                     driver.findElementById(id).click();
+
+                    // 페이지 로딩으로 인하여 0.4초간 쉬어줌
+                    Thread.sleep(400);
 
                     // 현재 페이지의 소스코드 가져오기(페이지 소스 업데이트)
                     doc = Jsoup.parse(driver.getPageSource());
@@ -367,7 +372,7 @@ public class Crawling {
 //                System.out.println("total count : " + result);
                 isEnd = false;
             }
-//            Thread.sleep(400);
+            Thread.sleep(400);
         }
 
         doc = Jsoup.parse(driver.getPageSource());
@@ -400,7 +405,7 @@ public class Crawling {
         info.put("매물", for_sale_arr);
 
         // 결과 출력
-        System.out.println(info);
+        System.out.println(info.get("단지 내 면적별 정보"));
 
         driver.quit();
 
