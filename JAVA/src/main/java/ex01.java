@@ -23,10 +23,8 @@ import static org.openqa.selenium.Keys.PAGE_DOWN;
 public class ex01 {
     public static void main(String[] args) throws InterruptedException {
 
-        String ex = "95/75, 1/22층, 남향";
-        String[] split = ex.split(",");
-        System.out.println(Arrays.toString(split));
-        System.out.println(split[0]);
+        String a = "asd asd ad   ad";
+        System.out.println(a.replaceAll(" ",""));
 
 
     }
