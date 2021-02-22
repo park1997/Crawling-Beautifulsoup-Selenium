@@ -408,9 +408,5 @@ public class Crawling {
         System.out.println(info.get("단지 내 면적별 정보"));
 
         driver.quit();
-
-
-
-
     }
 }
