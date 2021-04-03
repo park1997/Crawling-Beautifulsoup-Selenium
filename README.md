@@ -1,6 +1,6 @@
 # Beautifulsoup , Selenium 
  
- 크롤링
+ Crawling Info
  ==
  
  * Html
