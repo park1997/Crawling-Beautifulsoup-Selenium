@@ -1,17 +1,22 @@
-// 입력 받은 단지코드명에 기반하여 단지정보의 스크래핑을 Json 형태로 완료함
-
-위 코드는 "리얼서치" 라는 사이트의 기여를 함.
-
-스크린샷 2021-03-07 오후 4.22.51![image](https://user-images.githubusercontent.com/73048180/110232528-7e276b80-7f61-11eb-854f-25aa8d7dcd76.png)
-<img width="1456" alt="스크린샷 2021-03-07 오후 4 23 55" src="https://user-images.githubusercontent.com/73048180/110232534-85e71000-7f61-11eb-953e-70a736fa8ab2.png">
-<img width="1612" alt="스크린샷 2021-03-07 오후 4 24 17" src="https://user-images.githubusercontent.com/73048180/110232538-9303ff00-7f61-11eb-967e-f6f3fc7a65d0.png">
-
-
-
-
-
-
-
+# Beautifulsoup , Selenium 
+ 
+ 크롤링
+ ==
+ 
+ * Html
+ * Xpath
+ * requests 모듈
+ * re 모듈
+ * USER-Agent
+ * Beautifulsoup활용
+ * 네이버웹툰 크롤링
+ * 쿠팡 쇼핑목록 크롤링
+ * 다음 영화 웹페이지 크롤링
+ * CSV
+ * Selenium 활용
+ * 아이디 비밀번호 입력후 로그인 기능
+ * 페이지 업다운으로 동적페이지 핸들링
+ * Headless
 
 
 
