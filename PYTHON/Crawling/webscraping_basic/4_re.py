@@ -22,14 +22,15 @@ def print_match(m):
 
 m= p.match("careless") #match : 주어진 문자열의 처음부터 일치하는지 확인
 print_match(m)
-print()
-m=p.search("good care") # 주어진 문자열 중에 일치하는게 있는지 확인
-print_match(m)
-print()
-lst=p.findall("careless") # 일치하는 모든것을 리스트 형태로 반환
-print(lst,"\n")
-lst1=p.findall("good care cafe")
-print(lst1)
+print(m)
+# print()
+# m=p.search("good care") # 주어진 문자열 중에 일치하는게 있는지 확인
+# print_match(m)
+# print()
+# lst=p.findall("careless") # 일치하는 모든것을 리스트 형태로 반환
+# print(lst,"\n")
+# lst1=p.findall("good care cafe")
+# print(lst1)
 
 
 # 1. p= re.compile("원하는 형태")
