@@ -22,7 +22,6 @@ def print_match(m):
 
 m= p.match("careless") #match : 주어진 문자열의 처음부터 일치하는지 확인
 print_match(m)
-print(m)
 # print()
 # m=p.search("good care") # 주어진 문자열 중에 일치하는게 있는지 확인
 # print_match(m)
